@@ -1,0 +1,94 @@
+For Pi acquisition,
+
+Pulling the GPIO up and down is relatively simple, the issue is how tight you need your timing vs how much of a circuit you want to build.
+Hand waving over a few paragraphs of discussion on those items, this is the simplest option I think will work.
+
+1. Use the code example and diagram here, with some minor modification.
+http://www.raspberrypi.org/learning/parent-detector/WORKSHEET.md
+- You have two options here. You can either have the pi software trigger the laser and acquisition, or you can have the button press on the laser pointer trigger acquisition. I'll assume you want the former (all software) for now.
+- If you also want to power the laser via the pi, you'll need an npn transistor, I left a pack with the point grey.
+2. Attach pi pin 6 (ground) to your laser ground
+3. Attach pi pin 7 (gp signal) to transistor base
+4. Attach pi pin 2 (Vcc) to transistor collector
+5. Attach laser Vin to transistor emitter
+
+(in the alternative version, we use the same hardware, we just reverse what the base and emitter are, remove the voltage from the pi and make sure we have a resistor or diode in place to ensure we don't hurt the pi)
+The following version runs a software trigger ever 2 seconds. Obviously you could remove the loop to have it just run once or trigger off something more intelligent than a while True, run code, pause model.
+ 
+open nano and make the following:
+
+terminal: # nano LZP.py
+
+#!/usr/bin/python
+import RPi.GPIO as GPIO
+import time
+import picamera
+import datetime  # new
+
+def getFileName():  # new
+    return datetime.datetime.now().strftime("%Y-%m-%d_%H.%M.%S.h264")
+
+flashPin = 7
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(flashPin, GPIO.OUT, pull_up_down=GPIO.PUD_DOWN)
+
+prevState = False
+currState = False
+
+cam = picamera.PiCamera()
+
+while True:
+    time.sleep(2.0)
+    prevState = currState
+    currState = GPIO.input(flashPin)
+    if currState != prevState:
+        newState = "HIGH" if currState else "LOW"
+        print "GPIO pin %s is %s" % (flashPin, newState)
+        if currState:
+            fileName = getFileName()  # new
+            cam.start_preview()
+            cam.start_recording(fileName)  # new
+        else:
+            cam.stop_preview()
+            cam.stop_recording()  # new
+
+Ctrl + O (save)
+
+Ctrl + X (close)
+
+run via:
+
+terminal: #sudo ./LZP.py
+
+Note that if you don't like the cam.start/stop you should be able to replace:
+
+if currState:
+            fileName = getFileName()  # new
+            cam.start_preview()
+            cam.start_recording(fileName)  # new
+        else:
+            cam.stop_preview()
+            cam.stop_recording()  # new
+
+with:
+raspistill -o test.jpg 
+
+but I don't know if it will be as fast. 
+
+
+Other examples with various methods at higher timing resolutions and different code can be found here:
+http://www.davidhunt.ie/water-droplet-photography-with-raspberry-pi/
+
+http://www.davidhunt.ie/water-droplet-photography-with-raspberry-pi/
+
+
+If you'd prefer java:
+http://pi4j.com/example/trigger.html
+
+Or if you just like building circuits:
+http://www.instructables.com/id/Laser-Triggered-High-Speed-Photography/?ALLSTEPS
+
+
+
+Please note I haven't had a chance to try the code above, so it is entirely possible there is a typo or mistake, but it should give you the target idea. Hopefully I haven't embarrassed myself too much. 
