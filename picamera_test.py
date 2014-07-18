@@ -10,7 +10,8 @@ import picamera
 #	camera.close()
 
 with picamera.PiCamera() as camera:
-	camera.resolution = (1280,720)
+	camera.resolution = (640,480)
+	camera.framerate = 90
 	camera.start_preview()
 	#camera.exposure_compensation = 2
 	#camera.exposure_mode = 'spotlight'
@@ -27,3 +28,17 @@ with picamera.PiCamera() as camera:
 #		time.sleep(0.1)
 	camera.stop_preview()
 
+
+
+# see http://blog.derivatived.com/posts/OpenCV-Tutorial-on-Face-Tracking-Raspberry-PI-Camera/
+#import io
+##saving the picture to an in-program stream rather than a file
+#stream = io.BytesIO()
+#camera.capture(stream, format='jpeg')
+##convert image into numpy array
+#data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+##turn the array into a cv2 image
+#image = cv2.imdecode(data, 1)
+
+# for HW modding (e.g., lenses), see http://wiki.raspberrytorte.com/index.php?title=Camera_Module_Lens_Modifcation
+# and https://learn.adafruit.com/diy-wifi-raspberry-pi-touch-cam/assembling-enclosure
