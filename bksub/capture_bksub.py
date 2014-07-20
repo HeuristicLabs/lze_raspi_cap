@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-INTERLEAVED = true # else, first capture many imgs of one, then other, then subtract
+INTERLEAVED = True # else, first capture many imgs of one, then other, then subtract
 
 # captures 2*num_images, where
 #def capture(path, exposure_time, num_images, interleaved = true)
